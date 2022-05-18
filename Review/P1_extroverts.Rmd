@@ -1,0 +1,88 @@
+---
+title: "Revisitng R (Extroverts and productivity)"
+author: "Belle Joy Stevens"
+date: '2022-05-18'
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+```
+
+## Extrovert Rating
+
+The extrovert status makes a little difference in revenue and overall productivity 
+
+```{r}
+library(readr)
+project <- read_csv("C:/Users/belle/OneDrive/Desktop/Analytics/project.txt")
+library(tidyverse)
+glimpse(project)
+library(reader)
+install.packages("reader")
+library(reader)
+glimpse(project)
+qplot(extrovert, revenue, data = project)
+```
+
+Generic qqplots are not very detailed. Lets try boxplots
+
+```{r}
+qplot(extrovert, revenue, data = project, geom = 'boxplot')
+```
+
+This gives you an idea about the median and being an extrovert is'nt doing much because the distribution above and below the median looks almost the same
+
+Lets replace boxplots with violin graph
+
+```{r}
+qplot(extrovert, revenue, data = project, geom = 'violin')
+```
+
+This is a little more detailed, the wide area is the median.
+
+Using other useful functions of R like mean, median and group_by (their education levels), filter (in this case filtering employees with no prior experience)
+
+```{r}
+project %>% summarize(avg = mean(revenue))
+project %>% summarize(avg = mean(revenue), med = median(revenue), count = n())
+project %>% group_by(education) %>% summarize(avg = mean(revenue), med = median(revenue), count = n())
+no_prior = project %>% filter(prior_sales == 0)
+```
+
+Next, we find the quantiles and bottom and top employees and find a summary of it
+
+```{r}
+q10 = quantile(project$revenue, 0.1)
+q10
+q90 = quantile(project$revenue, 0.9)
+q90
+top10 = project %>% filter(revenue >= q90)
+top10 = project %>% filter(revenue >= q90)
+bottom10 = project %>% filter(revenue <= q10)
+top10 = project %>% filter(revenue >= q90)
+bottom10
+summary(top10)
+summary(bottom10)
+
+```
+
+we see that extrovert variable is recognized as character and not a string and that doesnt add any value to the data. Therefore lets add a new row where LOW, MED and HIGH will be strings and lets see how that changes the data
+
+```{r}
+ext_levels = c('LOW', 'MED', 'HIGH')
+project = project %>% mutate(ext_factors = factor(extrovert, levels = ext_levels))
+glimpse(project)
+bottom10 = project %>% filter(revenue <= q10)
+top10 = project %>% filter(revenue >= q90)
+summary(top10)
+summary(bottom10)
+```
+
+No we can see how well the extroverts are doing when the variable became string. Now lets redo the violin graph. Instead of extrovert we replace with ext_factors on the X-axis
+
+```{r}
+qplot(ext_factors, revenue, data = project, geom = 'violin')
+```
+ 
+This makes the data much more meaningful
